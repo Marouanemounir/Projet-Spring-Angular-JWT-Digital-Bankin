@@ -1,0 +1,68 @@
+# Environment variables - NEVER commit real secrets
+.env
+.env.local
+.env.*.local
+application-secret.yml
+application-local.yml
+
+# Backend
+backend/target/
+backend/.idea/
+backend/.vscode/
+backend/*.iml
+backend/.DS_Store
+backend/logs/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.vscode/
+frontend/.idea/
+frontend/*.code-workspace
+frontend/.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+*.code-workspace
+
+# Build outputs
+target/
+dist/
+build/
+*.jar
+*.war
+*.ear
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Java
+*.class
+*.log
+*.ctxt
+.mtj.tmp/
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.rar
+
+# Misc
+.vscode
+.idea
+*.orig
+*.bak
