@@ -1,5 +1,9 @@
 package ma.abdelali.digitalbanking.services.impl;
 
+import com.theokanning.openai.completion.chat.ChatCompletionRequest;
+import com.theokanning.openai.completion.chat.ChatMessage;
+import com.theokanning.openai.service.OpenAiService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.abdelali.digitalbanking.dtos.ChatRequest;
@@ -18,23 +22,34 @@ public class ChatbotServiceImpl implements ChatbotService {
     @Value("${OPENAI_API_KEY:}")
     private String openaiApiKey;
 
+    private OpenAiService openAiService;
+
     private final List<String> knowledgeBase = new ArrayList<>();
-    private final Map<String, List<String>> conversationHistories = new HashMap<>();
+    private final Map<String, List<ChatMessage>> conversationHistories = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        if (openaiApiKey != null && !openaiApiKey.trim().isEmpty()) {
+            this.openAiService = new OpenAiService(openaiApiKey);
+            log.info("OpenAI Service initialized successfully.");
+        } else {
+            log.warn("OPENAI_API_KEY is not set. Chatbot will use fallback rules.");
+        }
+    }
 
     @Override
     public ChatResponse chat(ChatRequest request) {
         String conversationId = request.getConversationId() != null ? 
             request.getConversationId() : UUID.randomUUID().toString();
 
-        // For now, provide a helpful response about the banking app
-        String answer = generateAnswer(request.getMessage());
+        String answer;
         List<String> sources = retrieveRelevantSources(request.getMessage());
 
-        // Store conversation history
-        conversationHistories.computeIfAbsent(conversationId, k -> new ArrayList<>())
-                .add("User: " + request.getMessage());
-        conversationHistories.get(conversationId)
-                .add("Bot: " + answer);
+        if (openAiService != null) {
+            answer = generateOpenAiAnswer(conversationId, request.getMessage());
+        } else {
+            answer = generateAnswer(request.getMessage());
+        }
 
         log.info("Chat interaction - Conversation: {}, Message: {}", conversationId, request.getMessage());
 
@@ -43,6 +58,32 @@ public class ChatbotServiceImpl implements ChatbotService {
                 .sources(sources)
                 .conversationId(conversationId)
                 .build();
+    }
+
+    private String generateOpenAiAnswer(String conversationId, String message) {
+        List<ChatMessage> history = conversationHistories.computeIfAbsent(conversationId, k -> {
+            List<ChatMessage> initHistory = new ArrayList<>();
+            initHistory.add(new ChatMessage("system", "You are an AI assistant for a Digital Banking application. You are helpful, professional, and concise. You help customers manage their accounts, perform transactions, and answer questions about the bank."));
+            return initHistory;
+        });
+
+        history.add(new ChatMessage("user", message));
+
+        ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest.builder()
+                .model("gpt-3.5-turbo")
+                .messages(history)
+                .temperature(0.7)
+                .build();
+
+        try {
+            String answer = openAiService.createChatCompletion(chatCompletionRequest)
+                    .getChoices().get(0).getMessage().getContent();
+            history.add(new ChatMessage("assistant", answer));
+            return answer;
+        } catch (Exception e) {
+            log.error("Failed to call OpenAI API", e);
+            return "Sorry, I am currently unable to process your request using AI. " + generateAnswer(message);
+        }
     }
 
     @Override
