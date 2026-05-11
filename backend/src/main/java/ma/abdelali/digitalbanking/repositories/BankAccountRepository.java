@@ -24,9 +24,9 @@ public interface BankAccountRepository extends JpaRepository<BankAccount, String
     @Query("SELECT ba FROM BankAccount ba WHERE LOWER(ba.id) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(ba.customer.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<BankAccount> search(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT COUNT(DISTINCT ba.account_type) as type FROM BankAccount ba WHERE ba.account_type = 'CA'")
+    @Query("SELECT COUNT(c) FROM CurrentAccount c")
     long countCurrentAccounts();
 
-    @Query("SELECT COUNT(DISTINCT ba.account_type) as type FROM BankAccount ba WHERE ba.account_type = 'SA'")
+    @Query("SELECT COUNT(s) FROM SavingAccount s")
     long countSavingAccounts();
 }

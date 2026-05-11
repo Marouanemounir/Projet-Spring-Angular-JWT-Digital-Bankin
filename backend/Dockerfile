@@ -1,20 +1,16 @@
-FROM openjdk:21-jdk-slim as builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-# Copy Maven wrapper files
-COPY .mvn .mvn
+# Copy pom.xml and source code
 COPY pom.xml .
-COPY mvnw .
-
-# Copy source code
 COPY src src
 
 # Build the application
-RUN chmod +x ./mvnw && ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # Runtime stage
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 

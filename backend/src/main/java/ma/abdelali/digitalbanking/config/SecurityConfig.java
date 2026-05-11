@@ -62,6 +62,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/h2-console/**").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
                 // Protected endpoints
                 .requestMatchers("/api/customers/**").hasAnyRole("ADMIN", "MANAGER", "USER")

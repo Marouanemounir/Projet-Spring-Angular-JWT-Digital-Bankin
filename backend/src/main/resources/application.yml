@@ -94,9 +94,9 @@ spring:
       on-profile: docker
 
   datasource:
-    url: jdbc:mysql://mysql:3306/digital_bank?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-    username: bank_user
-    password: bank_password123
+    url: ${DB_URL:jdbc:mysql://mysql:3306/digital_bank?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:bank_user}
+    password: ${DB_PASSWORD:bank_password123}
 
   jpa:
     hibernate:

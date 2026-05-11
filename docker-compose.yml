@@ -29,7 +29,7 @@ services:
     ports:
       - "8085:8085"
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/digital_bank?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      DB_URL: jdbc:mysql://mysql:3306/digital_bank?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       DB_USERNAME: bank_user
       DB_PASSWORD: bank_password123
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-minimum-256-bits-long-for-security}

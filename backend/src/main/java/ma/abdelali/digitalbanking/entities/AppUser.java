@@ -35,7 +35,7 @@ public class AppUser {
     @Builder.Default
     private boolean enabled = true;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "app_user_roles",
         joinColumns = @JoinColumn(name = "user_id"),

@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Configuration
-@Profile("dev")
+@Profile({"dev", "docker"})
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializationConfig {
