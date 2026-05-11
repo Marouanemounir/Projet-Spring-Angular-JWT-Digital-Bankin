@@ -9,6 +9,7 @@ import ma.abdelali.digitalbanking.enums.OperationType;
 import ma.abdelali.digitalbanking.exceptions.*;
 import ma.abdelali.digitalbanking.repositories.*;
 import ma.abdelali.digitalbanking.services.BankAccountService;
+import ma.abdelali.digitalbanking.services.TelegramService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +31,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     private final CurrentAccountRepository currentAccountRepository;
     private final SavingAccountRepository savingAccountRepository;
     private final AccountOperationRepository accountOperationRepository;
+    private final TelegramService telegramService;
 
     // ==================== Customer Operations ====================
 
@@ -265,6 +267,9 @@ public class BankAccountServiceImpl implements BankAccountService {
         operation.setPerformedBy(getCurrentUsername());
         accountOperationRepository.save(operation);
 
+        String msg = "🚨 <b>DEBIT ALERT</b>\nAccount: <code>" + accountId + "</code>\nAmount: <b>" + amount + " " + account.getCurrency() + "</b>\nDescription: " + description;
+        telegramService.sendMessage(msg);
+
         log.info("Debit operation: account={}, amount={}", accountId, amount);
     }
 
@@ -295,6 +300,9 @@ public class BankAccountServiceImpl implements BankAccountService {
         operation.setBankAccount(account);
         operation.setPerformedBy(getCurrentUsername());
         accountOperationRepository.save(operation);
+
+        String msg = "✅ <b>CREDIT ALERT</b>\nAccount: <code>" + accountId + "</code>\nAmount: <b>" + amount + " " + account.getCurrency() + "</b>\nDescription: " + description;
+        telegramService.sendMessage(msg);
 
         log.info("Credit operation: account={}, amount={}", accountId, amount);
     }
@@ -355,6 +363,9 @@ public class BankAccountServiceImpl implements BankAccountService {
         creditOp.setBankAccount(destinationAccount);
         creditOp.setPerformedBy(getCurrentUsername());
         accountOperationRepository.save(creditOp);
+
+        String msg = "🔄 <b>TRANSFER ALERT</b>\nFrom: <code>" + accountIdSource + "</code>\nTo: <code>" + accountIdDestination + "</code>\nAmount: <b>" + amount + "</b>\nDescription: " + description;
+        telegramService.sendMessage(msg);
 
         log.info("Transfer operation: from={}, to={}, amount={}", accountIdSource, accountIdDestination, amount);
     }

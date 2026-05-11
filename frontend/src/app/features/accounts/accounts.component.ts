@@ -15,7 +15,7 @@ import { AccountService, BankAccount, AccountPage } from '../../core/services/ac
         </div>
         <div class="card-body">
           <div class="row mb-3">
-            <div class="col-md-6">
+            <div class="col-md-5">
               <form (ngSubmit)="onSearch()" class="d-flex">
                 <input type="text" class="form-control me-2" placeholder="Search by account ID" [(ngModel)]="keyword" name="keyword">
                 <button type="submit" class="btn btn-outline-success">
@@ -23,6 +23,21 @@ import { AccountService, BankAccount, AccountPage } from '../../core/services/ac
                 </button>
               </form>
             </div>
+            
+            <!-- QUICK TRANSACTION TEST -->
+            <div class="col-md-7 border-start pl-3">
+              <form (ngSubmit)="testTransaction()" class="d-flex align-items-center">
+                <span class="me-2 fw-bold text-muted small">Quick Test:</span>
+                <select class="form-select form-select-sm me-2" [(ngModel)]="txType" name="txType" style="width: auto;">
+                  <option value="CREDIT">Credit</option>
+                  <option value="DEBIT">Debit</option>
+                </select>
+                <input type="text" class="form-control form-control-sm me-2" placeholder="Account ID" [(ngModel)]="txAccountId" name="txAccountId" style="width: 130px;">
+                <input type="number" class="form-control form-control-sm me-2" placeholder="Amount" [(ngModel)]="txAmount" name="txAmount" style="width: 100px;">
+                <button type="submit" class="btn btn-sm btn-primary" [disabled]="!txAccountId || !txAmount">Submit</button>
+              </form>
+            </div>
+            <!-- END QUICK TRANSACTION TEST -->
           </div>
 
           <div *ngIf="loading" class="text-center my-4">
@@ -102,10 +117,38 @@ export class AccountsComponent implements OnInit {
   loading: boolean = false;
   errorMessage: string = '';
 
+  // Quick transaction fields
+  txType: string = 'CREDIT';
+  txAccountId: string = '';
+  txAmount: number | null = null;
+
   constructor(private accountService: AccountService) {}
 
   ngOnInit(): void {
     this.handleSearchAccounts();
+  }
+
+  testTransaction(): void {
+    if (!this.txAccountId || !this.txAmount) return;
+
+    const desc = "Test operation via UI";
+    let request;
+
+    if (this.txType === 'CREDIT') {
+      request = this.accountService.credit(this.txAccountId, this.txAmount, desc);
+    } else {
+      request = this.accountService.debit(this.txAccountId, this.txAmount, desc);
+    }
+
+    request.subscribe({
+      next: () => {
+        alert(`${this.txType} of ${this.txAmount} successful! Check your Telegram!`);
+        this.handleSearchAccounts(); // refresh list
+      },
+      error: (err) => {
+        alert("Transaction failed: " + err.message);
+      }
+    });
   }
 
   onSearch(): void {
